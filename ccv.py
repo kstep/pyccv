@@ -12,7 +12,7 @@ def _get_system_extension():
 
 
 _libraries = {}
-_libraries['libccv'] = CDLL('libccv.%s' % _get_system_extension())
+_libraries['libccv'] = CDLL('./libccv.%s' % _get_system_extension())
 STRING = c_char_p
 WSTRING = c_wchar_p
 
