@@ -16,6 +16,22 @@ _libraries['libccv'] = CDLL('./libccv.%s' % _get_system_extension())
 STRING = c_char_p
 WSTRING = c_wchar_p
 
+function = type(_get_system_extension)
+
+def ctypesfunc(restype=None, argtypes=None, lib=_libraries['libccv'], name=None):
+    def wrapper(func):
+        cfunc = getattr(lib, name or func.__name__)
+        cfunc.argtypes = argtypes or func.__defaults__
+        cfunc.restype = restype
+        cfunc.__doc__ = func.__doc__
+        cfunc.__name__ = func.__name__
+
+        return cfunc
+
+    if isinstance(restype, function):
+        return wrapper(restype)
+
+    return wrapper
 
 _CS_POSIX_V7_LPBIG_OFFBIG_LINTFLAGS = 1147
 _CS_POSIX_V7_LPBIG_OFFBIG_LDFLAGS = 1145
@@ -602,6 +618,15 @@ ccv_enable_cache.argtypes = [size_t]
 #ccv_read = _libraries['libccv'].ccv_read
 #ccv_read.restype = c_int
 #ccv_read.argtypes = [STRING, POINTER(POINTER(ccv_dense_matrix_t)), c_int]
+
+@ctypesfunc(POINTER(ccv_dense_matrix_t))
+def ccv_read_matrix(inp=c_void_p, type=c_int, rows=c_int, cols=c_int, scanline=c_int):
+    pass
+
+def ccv_read(fn, type=CCV_IO_ANY_FILE, rows=0, cols=0, scanline=0):
+    return ccv_read_matrix(fn, type, rows, cols, scanline).contents
+
+
 ccv_write = _libraries['libccv'].ccv_write
 ccv_write.restype = c_int
 ccv_write.argtypes = [POINTER(ccv_dense_matrix_t), STRING, POINTER(c_int), c_int, c_void_p]
